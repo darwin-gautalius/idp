@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Processing SAML Response</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      background-color: #f5f5f5;
+    }
+    .processing-container {
+      text-align: center;
+      background: white;
+      padding: 2rem;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+    .loader {
+      border: 5px solid #f3f3f3;
+      border-top: 5px solid #3498db;
+      border-radius: 50%;
+      width: 50px;
+      height: 50px;
+      animation: spin 1s linear infinite;
+      margin: 20px auto;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+  <div class="processing-container">
+    <h2>Processing SAML Response</h2>
+    <div class="loader"></div>
+    <p>You are being redirected to the service provider...</p>
+  </div>
+  
+  <form id="samlForm" method="post" action="<%= AcsUrl %>">
+    <input type="hidden" name="SAMLResponse" value="<%= SAMLResponse %>" />
+    <% if (typeof RelayState !== 'undefined' && RelayState) { %>
+    <input type="hidden" name="RelayState" value="<%= RelayState %>" />
+    <% } %>
+  </form>
+  
+  <script>
+    // Auto-submit the form
+    document.addEventListener('DOMContentLoaded', function() {
+      console.log('Submitting SAML response form...');
+      document.getElementById('samlForm').submit();
+    });
+  </script>
+</body>
+</html> 
