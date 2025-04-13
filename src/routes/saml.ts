@@ -78,11 +78,6 @@ async function createSamlResponse(user: any, acsUrl: string, requestInfo: any = 
       }
     };
     
-    console.log('SAML Debug - IdP Certificate:', idp.entitySetting.signingCert ? 'Certificate loaded' : 'No certificate');
-    console.log('SAML Debug - IdP Private Key:', idp.entitySetting.privateKey ? 'Private key loaded' : 'No private key');
-    console.log('SAML Debug - SP Entity ID:', sp.entitySetting.entityID);
-    console.log('SAML Debug - ACS URL:', acsUrl);
-    
     // Use samlify's IdP to create login response
     const loginResponse = await idp.createLoginResponse(
       sp,
@@ -90,8 +85,6 @@ async function createSamlResponse(user: any, acsUrl: string, requestInfo: any = 
       'post',
       userData
     );
-    
-    console.log('SAML Debug - Response generated successfully');
     
     return loginResponse;
   } catch (error) {
