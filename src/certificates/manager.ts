@@ -106,8 +106,52 @@ export function getCertificates(): Certificate {
   return loadCertificates();
 }
 
+// Normalize certificate by ensuring proper PEM format
+function normalizeCertificate(cert: string): string {
+  // Remove any whitespace
+  cert = cert.trim();
+  
+  // Ensure it has proper begin/end markers
+  if (!cert.startsWith('-----BEGIN CERTIFICATE-----')) {
+    cert = '-----BEGIN CERTIFICATE-----\n' + cert;
+  }
+  
+  if (!cert.endsWith('-----END CERTIFICATE-----')) {
+    cert = cert + '\n-----END CERTIFICATE-----';
+  }
+  
+  // Normalize line breaks
+  cert = cert
+    .replace(/-----BEGIN CERTIFICATE-----/, '-----BEGIN CERTIFICATE-----\n')
+    .replace(/-----END CERTIFICATE-----/, '\n-----END CERTIFICATE-----');
+    
+  // Ensure proper line wrapping at 64 characters for the base64 content
+  const beginMarker = '-----BEGIN CERTIFICATE-----\n';
+  const endMarker = '\n-----END CERTIFICATE-----';
+  
+  let content = cert.substring(
+    beginMarker.length,
+    cert.length - endMarker.length
+  );
+  
+  // Remove all existing line breaks
+  content = content.replace(/\n/g, '');
+  
+  // Add line breaks every 64 characters
+  let formattedContent = '';
+  for (let i = 0; i < content.length; i += 64) {
+    formattedContent += content.substring(i, i + 64) + '\n';
+  }
+  
+  return beginMarker + formattedContent + endMarker;
+}
+
 // Format certificate for SAML metadata
 export function formatCertificateForSaml(cert: string): string {
+  // First ensure the certificate is properly formatted
+  cert = normalizeCertificate(cert);
+  
+  // Then extract only the base64 content without headers and line breaks
   return cert
     .replace(/-----BEGIN CERTIFICATE-----\n/, '')
     .replace(/\n-----END CERTIFICATE-----/, '')

@@ -2,17 +2,22 @@ import * as samlify from 'samlify';
 import * as validator from '@authenio/samlify-node-xmllint';
 import certManager from '../certificates/manager';
 
+// Configure samlify with validator
 samlify.setSchemaValidator(validator);
 
 const baseUrl = process.env.BASE_URL || 'http://localhost:3000';
 const loginUrl = process.env.IDP_LOGIN_URL || `${baseUrl}/saml/login`;
 const logoutUrl = process.env.IDP_LOGOUT_URL || `${baseUrl}/saml/logout`;
-const acsUrl = process.env.SP_ACS_URL || 'https://app.datasaur.ai/api/auth/multi-saml/redirect';
+const acsUrl = process.env.SP_ACS_URL || 'https://app.datasaur.ai/api/auth/saml/acs';
+
+// Get the exact SP Entity ID - this is critical to match Datasaur's expectations
+const spEntityId = process.env.SP_ENTITY_ID || 'datasaur';
 
 // Function to initialize or reinitialize SAML entities
 function createSamlEntities() {
-  // Get fresh certificates after they've been generated
+  // Get fresh certificates
   const currentCerts = certManager.getCertificates();
+  console.log('SAML Debug: Certificate loaded successfully');
   
   // Create IdP instance with metadata XML
   const idpMetadataXML = `<?xml version="1.0"?>
@@ -31,6 +36,7 @@ function createSamlEntities() {
   </IDPSSODescriptor>
 </EntityDescriptor>`;
 
+  // Configure IdP with explicit signature options
   const idp = samlify.IdentityProvider({
     entityID: process.env.IDP_ENTITY_ID || 'urn:test:idp',
     signingCert: currentCerts.certificate,
@@ -43,26 +49,40 @@ function createSamlEntities() {
     metadata: idpMetadataXML
   });
 
-  // Create SP instance (to be configured with LLM Labs settings)
+  // Force IDP to sign responses (patch samlify default behavior)
+  idp.entitySetting.wantMessageSigned = true;
+  idp.entitySetting.isAssertionEncrypted = false;
+
+  // Create SP instance with minimal config
   const sp = samlify.ServiceProvider({
-    entityID: process.env.SP_ENTITY_ID || 'urn:llm-labs:sp',
+    entityID: spEntityId,
     assertionConsumerService: [{
       Binding: 'urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST',
       Location: acsUrl
     }],
-    wantMessageSigned: false,
-    wantAssertionsSigned: false,
+    wantMessageSigned: true,
+    wantAssertionsSigned: true,
     authnRequestsSigned: false
   });
   
   return { idp, sp, certs: currentCerts };
 }
 
-// Create initial entities (these will be created with empty certs if not available)
+// Create entities
 const { idp, sp, certs } = createSamlEntities();
+
+// Function to reload SAML config with fresh certificates
+function reloadSamlConfig() {
+  const newEntities = createSamlEntities();
+  Object.assign(idp, newEntities.idp);
+  Object.assign(sp, newEntities.sp);
+  Object.assign(certs, newEntities.certs);
+  console.log('SAML configuration reloaded with fresh certificates.');
+}
 
 export {
   idp,
   sp,
   certs,
+  reloadSamlConfig
 }; 
