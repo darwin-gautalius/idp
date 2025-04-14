@@ -1,6 +1,6 @@
 import * as samlify from 'samlify';
 import * as validator from '@authenio/samlify-node-xmllint';
-import certManager from '../certificates/manager';
+import certManager from '../../certificates/manager';
 
 // Configure samlify with validator
 samlify.setSchemaValidator(validator);
@@ -17,7 +17,6 @@ const spEntityId = process.env.SP_ENTITY_ID || 'datasaur';
 function createSamlEntities() {
   // Get fresh certificates
   const currentCerts = certManager.getCertificates();
-  console.log('SAML Debug: Certificate loaded successfully');
   
   // Create IdP instance with metadata XML
   const idpMetadataXML = `<?xml version="1.0"?>
