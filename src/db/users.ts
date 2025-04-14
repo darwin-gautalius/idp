@@ -1,4 +1,4 @@
-import { User, UserRole } from '../types';
+import { User, UserRole } from "./types";
 
 const users: User[] = [
   {

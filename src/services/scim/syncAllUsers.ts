@@ -1,5 +1,5 @@
 import 'dotenv/config';
-import { User } from '../../types';
+import { User } from "../../db/types";
 import { getAllUsers } from '../../db/users';
 
 // Configuration

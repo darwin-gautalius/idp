@@ -1,6 +1,6 @@
 import { idp, sp } from './config';
 import * as crypto from 'crypto';
-import { User } from '../../types';
+import { User } from "../../db/types";
 
 // Create SAML response using samlify
 export async function createSamlResponse(user: User, acsUrl: string, requestInfo: any = {}) {

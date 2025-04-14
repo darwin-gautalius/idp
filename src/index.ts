@@ -5,7 +5,7 @@ import path from 'path';
 import session from 'express-session';
 import samlRoutes from './services/saml/routes';
 import scimRoutes from './services/scim/routes';
-import { ScimError } from './types';
+import { ScimError } from './services/scim/types';
 
 // Initialize Express app
 const app = express();

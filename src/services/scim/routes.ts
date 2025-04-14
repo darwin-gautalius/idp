@@ -1,6 +1,7 @@
 import { Router, Request, Response } from 'express';
 import { findUserById, getAllUsers } from '../../db/users';
-import { User, ScimUser, ScimListResponse, ScimError } from '../../types';
+import { ScimUser, ScimListResponse, ScimError } from './types';
+import { User } from "../../db/types";
 
 const router = Router();
 
