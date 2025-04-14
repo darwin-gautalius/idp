@@ -1,4 +1,4 @@
-import * as dotenv from 'dotenv';
+import 'dotenv/config';
 import express, { Request, Response, NextFunction } from 'express';
 import cors from 'cors';
 import path from 'path';
@@ -6,9 +6,6 @@ import session from 'express-session';
 import samlRoutes from './routes/saml';
 import scimRoutes from './routes/scim';
 import { ScimError } from './types';
-
-// Load environment variables early
-dotenv.config();
 
 // Initialize Express app
 const app = express();

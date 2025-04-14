@@ -1,6 +1,6 @@
 import 'dotenv/config';
-import { User } from '../types';
-import { getAllUsers } from '../db/users';
+import { User } from '../../types';
+import { getAllUsers } from '../../db/users';
 
 // Configuration
 const LLM_LABS_SCIM_BASE_URL = process.env.LLM_LABS_SCIM_BASE_URL || 'https://app.datasaur.ai/api/teams/:teamId/scim/v2';
@@ -105,7 +105,7 @@ async function syncUser(user: User) {
 }
 
 // Sync all users to LLM Labs
-async function syncAllUsers() {
+export async function syncAllUsers() {
   const users = getAllUsers();
   const results = {
     success: 0,
@@ -125,8 +125,3 @@ async function syncAllUsers() {
   
   return results;
 }
-
-export {
-  syncUser,
-  syncAllUsers
-}; 

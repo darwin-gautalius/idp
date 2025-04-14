@@ -1,5 +1,5 @@
 import 'dotenv/config';
-import { syncAllUsers } from '../src/services/llmLabsScim';
+import { syncAllUsers } from '../src/services/scim/syncAllUsers';
 
 async function main() {
   console.log('Starting user synchronization with LLM Labs...');
