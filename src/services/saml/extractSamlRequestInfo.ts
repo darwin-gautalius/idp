@@ -1,5 +1,5 @@
 import * as crypto from 'crypto';
-import { decodeBase64Deflated } from '../../utils/decodeBase64Deflated';
+import { decodeBase64Deflated } from './decodeBase64Deflated';
 
 const acsUrl = process.env.SP_ACS_URL || 'https://app.datasaur.ai/api/auth/multi-saml/redirect';
 
