@@ -1,8 +1,8 @@
 import { Router, Request, Response } from 'express';
-import { idp } from '../services/saml/config';
-import { findUserByEmail } from '../db/users';
-import { createSamlResponse } from '../services/saml/createSamlResponse';
-import { extractSamlRequestInfo } from '../services/saml/extractSamlRequestInfo';
+import { idp } from './config';
+import { findUserByEmail } from '../../db/users';
+import { createSamlResponse } from './createSamlResponse';
+import { extractSamlRequestInfo } from './extractSamlRequestInfo';
 
 const acsUrl = process.env.SP_ACS_URL || 'https://app.datasaur.ai/api/auth/multi-saml/redirect';
 

@@ -3,8 +3,8 @@ import express, { Request, Response, NextFunction } from 'express';
 import cors from 'cors';
 import path from 'path';
 import session from 'express-session';
-import samlRoutes from './routes/saml';
-import scimRoutes from './routes/scim';
+import samlRoutes from './services/saml/routes';
+import scimRoutes from './services/scim/routes';
 import { ScimError } from './types';
 
 // Initialize Express app
