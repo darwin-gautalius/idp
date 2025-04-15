@@ -4,7 +4,7 @@
   "description": "Identity Provider for LLM Labs integration",
   "main": "src/index.ts",
   "scripts": {
-    "start": "tsx src/index.ts",
+    "start": "tsx --inspect=2888 src/index.ts",
     "dev": "tsx watch src/index.ts",
     "type-check": "tsc --noEmit",
     "tunnel": "ngrok http 3000",
