@@ -1,6 +1,8 @@
 import * as samlify from 'samlify';
 import * as validator from '@authenio/samlify-node-xmllint';
 import certManager from '../../certificates/manager';
+import { readFileSync } from 'fs';
+import { join } from 'path';
 
 // Configure samlify with validator
 samlify.setSchemaValidator(validator);
@@ -12,6 +14,11 @@ const acsUrl = process.env.SP_ACS_URL || 'https://app.datasaur.ai/api/auth/saml/
 
 // Get the exact SP Entity ID - this is critical to match Datasaur's expectations
 const spEntityId = process.env.SP_ENTITY_ID || 'datasaur';
+
+// Create our explicit SAML response template with hardcoded attributes
+// This will be directly used when we patch the samlify instance
+
+const explicitSamlTemplate = readFileSync(join(__dirname, 'samlResponseTemplate.xml'), 'utf8');
 
 // Function to initialize or reinitialize SAML entities
 function createSamlEntities() {
@@ -45,10 +52,18 @@ function createSamlEntities() {
       Binding: 'urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST',
       Location: loginUrl
     }],
-    metadata: idpMetadataXML
+    metadata: idpMetadataXML,
+    
+    // Apply our explicit template by directly patching the idp entity settings
+    // This bypasses any type issues and makes sure our template is used
+    loginResponseTemplate: {
+      context: explicitSamlTemplate,
+      attributes: []
+    }
   });
 
-  // Force IDP to sign responses (patch samlify default behavior)
+
+  // Force IDP to sign responses
   idp.entitySetting.wantMessageSigned = true;
   idp.entitySetting.isAssertionEncrypted = false;
 
