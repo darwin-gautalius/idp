@@ -1,10 +1,17 @@
 import 'dotenv/config';
 import { User } from "../../db/types";
 import { getAllUsers } from '../../db/users';
+import https from 'https';
 
 // Configuration
 const LLM_LABS_SCIM_BASE_URL = process.env.LLM_LABS_SCIM_BASE_URL || 'https://app.datasaur.ai/api/teams/:teamId/scim/v2';
 const LLM_LABS_API_KEY = process.env.LLM_LABS_API_KEY || '';
+
+// Create an HTTPS agent that accepts self-signed certificates
+// Note: In production, it's better to properly set up certificates
+const httpsAgent = new https.Agent({
+  rejectUnauthorized: process.env.NODE_ENV === 'production'
+});
 
 // Convert our user model to SCIM format
 function mapUserToScim(user: User) {
@@ -39,12 +46,18 @@ async function syncUser(user: User) {
       'Content-Type': 'application/json'
     };
     
+    // Common fetch options with the HTTPS agent for self-signed certs
+    const fetchOptions = {
+      headers,
+      agent: httpsAgent
+    };
+    
     // Try direct creation first since search is failing
     console.log(`Attempting to create user ${user.email}...`);
     try {
       const createResponse = await fetch(`${LLM_LABS_SCIM_BASE_URL}/Users`, {
         method: 'POST',
-        headers,
+        ...fetchOptions,
         body: JSON.stringify(scimUser)
       });
       
@@ -61,7 +74,7 @@ async function syncUser(user: User) {
         // Try to list all users instead of using search endpoint
         const listResponse = await fetch(`${LLM_LABS_SCIM_BASE_URL}/Users`, {
           method: 'GET',
-          headers
+          ...fetchOptions
         });
         
         if (!listResponse.ok) {
@@ -77,7 +90,7 @@ async function syncUser(user: User) {
           console.log(`Found existing user with ID ${existingUser.id}, updating...`);
           const updateResponse = await fetch(`${LLM_LABS_SCIM_BASE_URL}/Users/${existingUser.id}`, {
             method: 'PUT',
-            headers,
+            ...fetchOptions,
             body: JSON.stringify(scimUser)
           });
           
@@ -113,6 +126,8 @@ export async function syncAllUsers() {
     failures: [] as string[]
   };
   
+  console.log(`Starting sync of ${users.length} users...`);
+  
   for (const user of users) {
     try {
       await syncUser(user);
@@ -123,5 +138,6 @@ export async function syncAllUsers() {
     }
   }
   
+  console.log(`Sync complete: ${results.success} successful, ${results.failed} failed`);
   return results;
 }

@@ -2,6 +2,7 @@ import { Router, Request, Response } from 'express';
 import { findUserById, getAllUsers } from '../../db/users';
 import { ScimUser, ScimListResponse, ScimError } from './types';
 import { User } from "../../db/types";
+import { syncAllUsers } from './syncAllUsers';
 
 const router = Router();
 
@@ -27,6 +28,26 @@ function mapUserToScim(user: User): ScimUser {
     }]
   };
 }
+
+// Trigger manual sync of all users
+router.post('/sync', async function(req: Request, res: Response) {
+  try {
+    console.log('Starting manual user sync...');
+    const results = await syncAllUsers();
+    console.log('Sync complete:', results);
+    res.json({
+      success: true,
+      message: `User sync completed: ${results.success} successful, ${results.failed} failed`,
+      results
+    });
+  } catch (error: any) {
+    console.error('Error during sync:', error);
+    res.status(500).json({ 
+      success: false, 
+      message: `Error during user sync: ${error.message || 'Unknown error'}`
+    });
+  }
+});
 
 // List users
 router.get('/Users', function(req: Request, res: Response) {
