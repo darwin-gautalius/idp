@@ -1,11 +1,11 @@
 import 'dotenv/config';
-import express, { Request, Response, NextFunction } from 'express';
+import express, { Request, Response } from 'express';
 import cors from 'cors';
 import path from 'path';
 import session from 'express-session';
 import samlRoutes from './services/saml/routes';
 import scimRoutes from './services/scim/routes';
-import { ScimError } from './services/scim/types';
+import { validateScimToken } from './services/scim/validateScimToken';
 
 // Initialize Express app
 const app = express();
@@ -26,27 +26,6 @@ app.use(session({
 }));
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
-
-// SCIM Bearer token middleware
-function validateScimToken(req: Request, res: Response, next: NextFunction) {
-  const authHeader = req.headers.authorization;
-  if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    const error: ScimError = {
-      schemas: ['urn:ietf:params:scim:api:messages:2.0:Error'],
-      detail: 'Unauthorized'
-    };
-    return res.status(401).json(error);
-  }
-  const token = authHeader.split(' ')[1];
-  if (token !== process.env.SCIM_TOKEN) {
-    const error: ScimError = {
-      schemas: ['urn:ietf:params:scim:api:messages:2.0:Error'],
-      detail: 'Invalid token'
-    };
-    return res.status(401).json(error);
-  }
-  next();
-}
 
 // Routes
 app.use('/saml', samlRoutes);
